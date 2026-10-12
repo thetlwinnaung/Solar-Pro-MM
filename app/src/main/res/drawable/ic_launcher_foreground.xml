@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Sun rays & disk in upper corner -->
+    <path
+        android:fillColor="#FFD166"
+        android:pathData="M37,33 A7,7 0 1,1 44,40 A7,7 0 0,1 37,33 Z" />
+    <path
+        android:strokeColor="#FFD166"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:pathData="M37,23 L37,20 M27,33 L24,33 M30,26 L28,24 M44,26 L46,24 M30,40 L28,42" />
+
+    <!-- Solar PV Panel Grid (Tilted perspective frame) -->
+    <!-- Base Panel Rim -->
+    <path
+        android:fillColor="#1A535C"
+        android:strokeColor="#4CC9F0"
+        android:strokeWidth="1.8"
+        android:pathData="M32,46 L76,46 L82,78 L26,78 Z" />
+
+    <!-- Solar Cell dividers (vertical) -->
+    <path
+        android:strokeColor="#4CC9F0"
+        android:strokeWidth="1.2"
+        android:pathData="M47,46 L45,78 M61,46 L63,78" />
+
+    <!-- Solar Cell dividers (horizontal) -->
+    <path
+        android:strokeColor="#4CC9F0"
+        android:strokeWidth="1.2"
+        android:pathData="M30,56 L78,56 M28,67 L80,67" />
+
+    <!-- Cell subtle blue fill accents -->
+    <path
+        android:fillColor="#0D9488"
+        android:pathData="M33,48 L46,48 L44.5,55 L31.5,55 Z M48,48 L60,48 L59.5,55 L47.5,55 Z M62,48 L75,48 L77,55 L61.5,55 Z" />
+
+    <!-- Electrical Protection Lightning Bolt (Vibrant Gold with white glow) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M59,34 L45,53 L55,53 L47,74 L67,49 L56,49 Z" />
+    <path
+        android:fillColor="#FFB703"
+        android:pathData="M58,36 L46.5,52 L54.5,52 L48,70 L64.5,49 L55.5,49 Z" />
+
+</vector>

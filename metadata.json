@@ -1,0 +1,6 @@
+{
+  "name": "SolarPro MM",
+  "description": "Solar PV electrical engineering, LiFePO4 battery sizing, IEC 60364-7-712 switchgear protection, cable calculation, and Myanmar MOEP tariff ROI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

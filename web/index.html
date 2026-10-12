@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>SolarPro MM - Solar PV & Switchgear Sizer (Myanmar)</title>
+  
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SolarPro MM">
+  <meta name="theme-color" content="#0F172A">
+  <meta name="format-detection" content="telephone=no">
+
+  <style>
+    :root {
+      --primary: #F59E0B;
+      --primary-dark: #D97706;
+      --primary-light: #FEF3C7;
+      --bg: #0B1120;
+      --surface: #131D31;
+      --surface-variant: #1E293B;
+      --border: #334155;
+      --text: #F1F5F9;
+      --text-muted: #94A3B8;
+      --blue: #0284C7;
+      --green: #10B981;
+      --red: #EF4444;
+      --orange: #F97316;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      padding-top: var(--safe-top);
+      padding-bottom: calc(70px + var(--safe-bottom));
+    }
+
+    /* Top Navigation Bar */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(19, 29, 49, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: rgba(245, 158, 11, 0.18);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--primary);
+    }
+
+    .brand h1 {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+    }
+
+    .brand p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .lang-toggle-btn {
+      background: var(--surface-variant);
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn {
+      background: var(--surface-variant);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Content Area */
+    main {
+      flex: 1;
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .tab-content {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .tab-content.active {
+      display: flex;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards & Layout */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .metric-card {
+      background: var(--surface-variant);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .metric-card .label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .metric-card .value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .metric-card .sub {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    /* Appliance Row */
+    .appliance-item {
+      background: var(--surface-variant);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .app-title {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .app-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .qty-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 16px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .qty-val {
+      font-size: 15px;
+      font-weight: 800;
+      min-width: 20px;
+      text-align: center;
+      color: var(--primary);
+    }
+
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: var(--border);
+      border-radius: 4px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+    }
+
+    /* Chips */
+    .chips-row {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .chips-row::-webkit-scrollbar { display: none; }
+
+    .chip {
+      background: var(--surface-variant);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 6px 12px;
+      font-size: 11px;
+      color: var(--text);
+      white-space: nowrap;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .chip.active {
+      background: var(--primary-dark);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    /* Switchgear List */
+    .sw-item {
+      background: var(--surface-variant);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sw-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sw-badge {
+      background: rgba(245, 158, 11, 0.18);
+      color: var(--primary);
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 6px;
+      border-radius: 6px;
+    }
+
+    .sw-rating {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .warning-box {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #FCA5A5;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    /* Single Line Diagram Interactive View */
+    .sld-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sld-node {
+      background: var(--surface-variant);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .sld-node.active {
+      border-color: var(--primary);
+      background: rgba(245, 158, 11, 0.12);
+    }
+
+    .sld-node-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .sld-node-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Tier Table */
+    .tier-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .tier-table th, .tier-table td {
+      padding: 8px 6px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tier-table th {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Bottom Navigation Bar */
+    nav.bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      background: rgba(19, 29, 49, 0.98);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 4px calc(8px + var(--safe-bottom));
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 8px;
+      transition: all 0.2s;
+      min-width: 50px;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+      background: rgba(245, 158, 11, 0.12);
+    }
+
+    .nav-item .icon {
+      font-size: 18px;
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: calc(80px + var(--safe-bottom));
+      left: 50%;
+      transform: translateX(-50%) translateY(50px);
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--primary);
+      padding: 10px 18px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <h1>SolarPro MM</h1>
+        <p id="header-sub">Solar PV & Protection Design (Mandalay 5.0 PSH)</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="copy-btn" id="btn-copy-bom" onclick="copyScheduleToClipboard()">
+        📋 <span id="btn-copy-text">Copy BOM</span>
+      </button>
+      <button class="lang-toggle-btn" id="btn-lang-toggle" onclick="toggleLanguage()">
+        မြန်မာ
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Tabs -->
+  <main>
+    
+    <!-- Tab 0: System Sizing -->
+    <section id="tab-sizing" class="tab-content active">
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="label" id="lbl-inv">Inverter Size</div>
+          <div class="value" id="val-inv">5.0 kW</div>
+          <div class="sub" id="sub-inv">Continuous: 3.2 kW | Surge: 6.8 kW</div>
+        </div>
+        <div class="metric-card">
+          <div class="label" id="lbl-batt">LiFePO4 Battery</div>
+          <div class="value" style="color: var(--orange);" id="val-batt">10.2 kWh</div>
+          <div class="sub" id="sub-batt">1x 200Ah @ 51.2V (80% DoD)</div>
+        </div>
+        <div class="metric-card">
+          <div class="label" id="lbl-pv">Solar PV Array</div>
+          <div class="value" style="color: var(--primary);" id="val-pv">5.8 kWp</div>
+          <div class="sub" id="sub-pv">10x 580W TOPCon (1 String)</div>
+        </div>
+        <div class="metric-card">
+          <div class="label" id="lbl-energy">Daily Demand</div>
+          <div class="value" style="color: var(--green);" id="val-energy">22.4 kWh</div>
+          <div class="sub" id="sub-energy">Day: 12.0 kWh | Night: 10.4 kWh</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h3 style="font-size:14px; font-weight:700;" id="loc-title">Location & Peak Sun Hours (PSH)</h3>
+            <p style="font-size:11px; color:var(--text-muted);" id="loc-desc">Mandalay Dry Zone: 5.0 PSH avg, hot climate derating</p>
+          </div>
+          <span style="background:var(--primary-light); color:var(--primary-dark); font-size:12px; font-weight:800; padding:4px 8px; border-radius:6px;" id="val-psh">5.0 PSH</span>
+        </div>
+        <div class="chips-row" id="location-chips">
+          <div class="chip active" onclick="setLocation(0)">Mandalay (5.0)</div>
+          <div class="chip" onclick="setLocation(1)">Yangon (4.6)</div>
+          <div class="chip" onclick="setLocation(2)">Naypyitaw (4.9)</div>
+          <div class="chip" onclick="setLocation(3)">Bagan (5.2)</div>
+          <div class="chip" onclick="setLocation(4)">Shan (4.8)</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:14px; font-weight:700;" id="batt-select-title">LiFePO4 Modular Packs @ 51.2V DC</h3>
+        <p style="font-size:11px; color:var(--text-muted);" id="batt-select-desc">16S Lithium Iron Phosphate architecture with 6,000 cycle life</p>
+        <div class="chips-row">
+          <div class="chip" id="chip-100ah" onclick="setBatteryPackAh(100)">100Ah (5.12 kWh)</div>
+          <div class="chip active" id="chip-200ah" onclick="setBatteryPackAh(200)">200Ah (10.24 kWh)</div>
+          <div class="chip" id="chip-280ah" onclick="setBatteryPackAh(280)">280Ah (14.33 kWh)</div>
+          <div class="chip" id="chip-300ah" onclick="setBatteryPackAh(300)">300Ah (15.36 kWh)</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h3 style="font-size:14px; font-weight:700;" id="app-title">Connected Electrical Loads</h3>
+            <p style="font-size:11px; color:var(--text-muted);" id="app-sub">Adjust quantities, day hours (solar), and night hours (battery)</p>
+          </div>
+        </div>
+        <div id="appliances-container" style="display:flex; flex-direction:column; gap:10px;"></div>
+      </div>
+    </section>
+
+    <!-- Tab 1: Protection -->
+    <section id="tab-protection" class="tab-content">
+      <div class="card" style="background: rgba(2, 132, 199, 0.12); border-color: rgba(2, 132, 199, 0.4);">
+        <h3 style="font-size:14px; font-weight:700; color:var(--blue);" id="prot-header">IEC 60364-7-712 Switchgear Schedule</h3>
+        <p style="font-size:11px; color:var(--text-muted);" id="prot-sub">Protection device ratings for DC PV, LiFePO4 Battery, AC Grid, and Sub-panels</p>
+      </div>
+
+      <div class="warning-box" id="prot-warning">
+        ⚠️ <strong>CRITICAL SAFETY WARNINGS:</strong><br>
+        1. NEVER use standard AC MCBs on DC solar strings! DC arcs do not cross zero and cause electrical fires.<br>
+        2. LiFePO4 battery MCCB must have ≥ 20kA AIC breaking capacity to clear high short-circuit currents safely.<br>
+        3. Install TOMZN/SINOTIMER 63A V/A Protector (260V Over / 175V Under / 30s Delay) to guard against Myanmar grid fluctuations.
+      </div>
+
+      <div id="switchgear-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+    </section>
+
+    <!-- Tab 2: Cables -->
+    <section id="tab-cables" class="tab-content">
+      <div class="card">
+        <h3 style="font-size:14px; font-weight:700;" id="cable-header">Copper Cable Distance Sliders (Meters)</h3>
+        <p style="font-size:11px; color:var(--text-muted);">Ohm's Law: ΔV = (2 * L * I * ρ) / S (ρ = 0.0175 Ω·mm²/m)</p>
+        
+        <div class="slider-group">
+          <div class="slider-label">
+            <span id="lbl-pv-dist">PV to Inverter Cable Run:</span>
+            <span id="val-pv-dist">25 m</span>
+          </div>
+          <input type="range" id="slider-pv-dist" min="5" max="60" value="25" oninput="updateCableDistances()">
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-label">
+            <span id="lbl-batt-dist">Battery to Inverter Run (Keep ≤ 2m):</span>
+            <span id="val-batt-dist">2.0 m</span>
+          </div>
+          <input type="range" id="slider-batt-dist" min="0.5" max="5.0" step="0.5" value="2.0" oninput="updateCableDistances()">
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-label">
+            <span id="lbl-ac-dist">AC Grid Meter to Inverter Run:</span>
+            <span id="val-ac-dist">15 m</span>
+          </div>
+          <input type="range" id="slider-ac-dist" min="5" max="50" value="15" oninput="updateCableDistances()">
+        </div>
+      </div>
+
+      <div id="cables-container" style="display:flex; flex-direction:column; gap:10px;"></div>
+
+      <div class="card" style="border-left: 4px solid var(--green);">
+        <h3 style="font-size:13px; font-weight:700; color:var(--green);" id="earth-title">Grounding System (Target R < 5.0 Ω)</h3>
+        <p style="font-size:11px; line-height:1.5; color:var(--text-muted);" id="earth-desc">
+          • Electrode: 5/8" x 10ft copper-bonded steel rod driven into soil.<br>
+          • Array Frame: 6–10 mm² yellow-green copper equipotential bonding.<br>
+          • Main Earthing Lead: 16 mm² pure copper bonding SPD surge bus to rod.
+        </p>
+      </div>
+    </section>
+
+    <!-- Tab 3: Tariff -->
+    <section id="tab-tariff" class="tab-content">
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="label" id="lbl-sav">Monthly Savings</div>
+          <div class="value" style="color:var(--green);" id="val-sav">485,000 MMK</div>
+          <div class="sub" id="sub-sav">Grid + Avoided Gen Fuel</div>
+        </div>
+        <div class="metric-card">
+          <div class="label" id="lbl-payback">Payback Period</div>
+          <div class="value" id="val-payback">3.2 Years</div>
+          <div class="sub" id="sub-payback">Estimated Cost: ~185 Lakhs</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:14px; font-weight:700;" id="moep-title">Myanmar MOEP / MESC 4-Tier Tariff</h3>
+        <table class="tier-table">
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Rate</th>
+              <th>Monthly Units</th>
+              <th>Cost (MMK)</th>
+            </tr>
+          </thead>
+          <tbody id="tier-rows"></tbody>
+        </table>
+
+        <div style="display:flex; justify-content:space-between; margin-top:8px; padding-top:8px; border-top:1px solid var(--border);">
+          <div>
+            <div style="font-size:11px; color:var(--text-muted);" id="lbl-bill-no-solar">Bill Without Solar:</div>
+            <div style="font-size:15px; font-weight:800; color:var(--red);" id="val-bill-no-solar">185,000 MMK</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11px; color:var(--text-muted);" id="lbl-bill-solar">Bill With Solar:</div>
+            <div style="font-size:15px; font-weight:800; color:var(--green);" id="val-bill-solar">22,500 MMK</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:14px; font-weight:700;" id="genset-title">Avoided Generator Fuel (Load Shedding)</h3>
+        <p style="font-size:11px; color:var(--text-muted);" id="genset-desc">Daily load shedding avoided with solar + LiFePO4 battery (2,200 MMK/kWh)</p>
+        <div class="slider-group">
+          <div class="slider-label">
+            <span id="lbl-blackout">Daily Blackout Duration:</span>
+            <span id="val-blackout">4 Hours / day</span>
+          </div>
+          <input type="range" id="slider-blackout" min="0" max="12" value="4" oninput="updateBlackoutHours()">
+        </div>
+        <div style="background:rgba(16, 185, 129, 0.12); padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:12px; font-weight:700;" id="lbl-fuel-sav">Monthly Fuel Saved:</span>
+          <span style="font-size:15px; font-weight:800; color:var(--green);" id="val-fuel-sav">+322,500 MMK</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 4: SLD -->
+    <section id="tab-sld" class="tab-content">
+      <div class="card">
+        <h3 style="font-size:14px; font-weight:700;" id="sld-title">Single-Line Diagram Schematic</h3>
+        <p style="font-size:11px; color:var(--text-muted);" id="sld-sub">Tap any electrical block to inspect ratings and engineering rules</p>
+        
+        <div class="sld-container">
+          <div class="sld-node active" id="node-pv" onclick="selectSldNode('pv')">
+            <div class="sld-node-title">☀️ PV Array (5.8 kWp)</div>
+            <div class="sld-node-sub">10x 580W TOPCon | Voc Cold: 512V | Vmp: 428V</div>
+          </div>
+
+          <div style="text-align:center; color:var(--text-muted);">⬇️ DC XLPO Cable</div>
+
+          <div class="sld-node" id="node-dcbox" onclick="selectSldNode('dcbox')">
+            <div class="sld-node-title">🛡️ DC Combiner Box</div>
+            <div class="sld-node-sub">gPV 1000V 25A Fuses + 32A 1000V DC MCB + Type 2 SPD</div>
+          </div>
+
+          <div style="text-align:center; color:var(--text-muted);">⬇️ MPPT Input (150–450V)</div>
+
+          <div class="sld-node" id="node-inv" onclick="selectSldNode('inv')">
+            <div class="sld-node-title">⚡ Hybrid Inverter (5.0 kW)</div>
+            <div class="sld-node-sub">230V AC Single Phase / 51.2V DC Battery Hub</div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <div class="sld-node" id="node-batt" onclick="selectSldNode('batt')">
+              <div class="sld-node-title" style="color:var(--orange);">🔋 LiFePO4 51.2V</div>
+              <div class="sld-node-sub">10.24 kWh (200Ah)<br>MCCB ≥ 25kA AIC</div>
+            </div>
+            <div class="sld-node" id="node-ac" onclick="selectSldNode('ac')">
+              <div class="sld-node-title" style="color:var(--blue);">🔌 AC Grid & Loads</div>
+              <div class="sld-node-sub">TOMZN 63A Relay<br>30mA RCD ELCB</div>
+            </div>
+          </div>
+
+          <div class="sld-node" id="node-earth" onclick="selectSldNode('earth')">
+            <div class="sld-node-title" style="color:var(--green);">🌱 Earthing System (&lt; 5.0 Ω)</div>
+            <div class="sld-node-sub">16 mm² Copper Bonding to 5/8" x 10ft Rod</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="sld-detail-card">
+        <h4 style="font-size:13px; font-weight:700; color:var(--primary);" id="sld-detail-title">PV Array Electrical Checks</h4>
+        <p style="font-size:11.5px; line-height:1.6; color:var(--text-muted);" id="sld-detail-text">
+          Voc cold morning calculated safely below 500V DC inverter upper limit. String Vmp is centered in the optimal MPPT tracking zone.
+        </p>
+      </div>
+    </section>
+
+    <!-- Tab 5: Projects -->
+    <section id="tab-projects" class="tab-content">
+      <div class="card">
+        <h3 style="font-size:14px; font-weight:700;" id="proj-title">Project Proposals & Quotations</h3>
+        <p style="font-size:11px; color:var(--text-muted);" id="proj-sub">Save calculations locally in browser memory or copy schedule to Viber/Telegram</p>
+        
+        <div style="display:flex; gap:8px; margin-top:4px;">
+          <button style="flex:1; background:var(--primary); color:#000; font-weight:700; border:none; padding:10px; border-radius:10px; cursor:pointer;" onclick="saveCurrentProject()">
+            💾 <span id="btn-save-proj">Save Project</span>
+          </button>
+          <button style="flex:1; background:var(--surface-variant); border:1px solid var(--border); color:var(--text); font-weight:600; padding:10px; border-radius:10px; cursor:pointer;" onclick="copyScheduleToClipboard()">
+            📋 <span id="btn-copy-full">Copy BOM</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4 style="font-size:13px; font-weight:700;" id="saved-header">Saved Projects</h4>
+        <div id="saved-projects-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab('sizing')">
+      <span class="icon">☀️</span>
+      <span id="nav-sizing">Sizing</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('protection')">
+      <span class="icon">🛡️</span>
+      <span id="nav-prot">Protection</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('cables')">
+      <span class="icon">🔌</span>
+      <span id="nav-cables">Cables</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('tariff')">
+      <span class="icon">💰</span>
+      <span id="nav-tariff">Tariff ROI</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('sld')">
+      <span class="icon">📐</span>
+      <span id="nav-sld">SLD</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('projects')">
+      <span class="icon">📁</span>
+      <span id="nav-projects">Projects</span>
+    </button>
+  </nav>
+
+  <!-- Toast Notification -->
+  <div id="toast">Engineering Schedule copied to clipboard!</div>
+
+  <script>
+    let currentLang = 'EN';
+    let selectedLocationIdx = 0;
+    let selectedBatteryAh = 200;
+    let blackoutHours = 4.0;
+    let pvDistM = 25;
+    let battDistM = 2.0;
+    let acDistM = 15;
+
+    const locations = [
+      { nameEn: "Mandalay (5.0)", nameMy: "မန္တလေး (၅.၀)", psh: 5.0, descEn: "Mandalay & Central Dry Zone: High solar irradiance, 5.0 PSH avg, hot dry climate.", descMy: "မန္တလေးနှင့် အပူပိုင်းဒေသ - နေရောင်ခြည် ၅.၀ နာရီ၊ အပူချိန်မြင့်မား။" },
+      { nameEn: "Yangon (4.6)", nameMy: "ရန်ကုန် (၄.၆)", psh: 4.6, descEn: "Yangon & Delta: 4.6 PSH avg, monsoon rain factor June-Sept, humid maritime.", descMy: "ရန်ကုန်နှင့် မြစ်ဝကျွန်းပေါ် - နေရောင်ခြည် ပျမ်းမျှ ၄.၆ နာရီ။" },
+      { nameEn: "Naypyitaw (4.9)", nameMy: "နေပြည်တော် (၄.၉)", psh: 4.9, descEn: "Naypyitaw: 4.9 PSH avg, consistent sunshine hours, hot summer.", descMy: "နေပြည်တော် - နေရောင်ခြည် ပျမ်းမျှ ၄.၉ နာရီ။" },
+      { nameEn: "Bagan (5.2)", nameMy: "ပုဂံ (၅.၂)", psh: 5.2, descEn: "Bagan Dry Zone: Exceptional solar potential 5.2 PSH, intense ambient heat.", descMy: "ပုဂံ / မကွေး အပူပိုင်းဒေသ - နေရောင်ခြည် ၅.၂ နာရီ။" },
+      { nameEn: "Shan (4.8)", nameMy: "ရှမ်း (၄.၈)", psh: 4.8, descEn: "Shan Highlands: 4.8 PSH avg, cooler temp increases PV efficiency.", descMy: "ရှမ်းပြည်နယ် ကုန်းမြင့်ဒေသ - နေရောင်ခြည် ၄.၈ နာရီ။" }
+    ];
+
+    let appliances = [
+      { id: "ac1", nameEn: "1.0 HP Inverter AC", nameMy: "၁.၀ ကောင် အင်ဗာတာ လေအေးပေးစက်", watts: 750, surge: 1.5, qty: 1, dayH: 4, nightH: 4 },
+      { id: "fridge", nameEn: "Inverter Refrigerator", nameMy: "အင်ဗာတာ ရေခဲသေတ္တာ", watts: 150, surge: 2.0, qty: 1, dayH: 12, nightH: 12 },
+      { id: "pump", nameEn: "1.0 HP Water Pump", nameMy: "၁.၀ ကောင် ရေတင်မော်တာ", watts: 750, surge: 4.0, qty: 1, dayH: 1, nightH: 0 },
+      { id: "rice", nameEn: "Electric Rice Cooker", nameMy: "လျှပ်စစ် ထမင်းပေါင်းအိုး", watts: 700, surge: 1.0, qty: 1, dayH: 1.5, nightH: 0 },
+      { id: "lights", nameEn: "LED Lights (10W x 10)", nameMy: "အိမ်သုံး LED မီးသီးများ (၁၀ လုံး)", watts: 100, surge: 1.0, qty: 1, dayH: 2, nightH: 6 },
+      { id: "fans", nameEn: "Ceiling Fans (75W x 2)", nameMy: "မျက်နှာကျက် ပန်ကာများ (၂ လုံး)", watts: 150, surge: 1.3, qty: 1, dayH: 6, nightH: 6 },
+      { id: "tv", nameEn: "Smart TV 55\"", nameMy: "စမတ်တီဗွီ ၅၅ လက်မ", watts: 140, surge: 1.0, qty: 1, dayH: 2, nightH: 4 },
+      { id: "wifi", nameEn: "Wi-Fi & CCTV Cameras", nameMy: "ဝိုင်ဖိုင် နှင့် CCTV လုံခြုံရေး", watts: 50, surge: 1.0, qty: 1, dayH: 12, nightH: 12 }
+    ];
+
+    function toggleLanguage() {
+      currentLang = currentLang === 'EN' ? 'MY' : 'EN';
+      document.getElementById('btn-lang-toggle').innerText = currentLang === 'EN' ? 'မြန်မာ' : 'EN';
+      applyLanguage();
+      renderAll();
+    }
+
+    function applyLanguage() {
+      const isMy = currentLang === 'MY';
+      document.getElementById('header-sub').innerText = isMy ? "ဆိုလာ PV & IEC အကာအကွယ် ဒီဇိုင်း (မန္တလေး ၅.၀ နာရီ)" : "Solar PV & Protection Design (Mandalay 5.0 PSH)";
+      document.getElementById('btn-copy-text').innerText = isMy ? "BOM ကူးရန်" : "Copy BOM";
+      document.getElementById('nav-sizing').innerText = isMy ? "အရွယ်အစား" : "Sizing";
+      document.getElementById('nav-prot').innerText = isMy ? "ဘရိတ်ကာ" : "Protection";
+      document.getElementById('nav-cables').innerText = isMy ? "ကေဘယ်" : "Cables";
+      document.getElementById('nav-tariff').innerText = isMy ? "မီတာခ" : "Tariff ROI";
+      document.getElementById('nav-sld').innerText = isMy ? "ပုံကြမ်း" : "SLD";
+      document.getElementById('nav-projects').innerText = isMy ? "ပရောဂျက်" : "Projects";
+
+      document.getElementById('loc-title').innerText = isMy ? "ဒေသနှင့် နေရောင်ခြည် (PSH)" : "Location & Peak Sun Hours (PSH)";
+      document.getElementById('batt-select-title').innerText = isMy ? "LiFePO4 ဘက်ထရီ မော်ဂျူး @ 51.2V DC" : "LiFePO4 Modular Packs @ 51.2V DC";
+      document.getElementById('app-title').innerText = isMy ? "ချိတ်ဆက်မည့် လျှပ်စစ်ပစ္စည်းများ" : "Connected Electrical Loads";
+      document.getElementById('prot-header').innerText = isMy ? "IEC 60364-7-712 စံချိန်မီ အကာအကွယ်ပစ္စည်းများ" : "IEC 60364-7-712 Switchgear Schedule";
+      document.getElementById('cable-header').innerText = isMy ? "ကြေးနီဝါယာ အကွာအဝေး သတ်မှတ်ချက် (မီတာ)" : "Copper Cable Distance Sliders (Meters)";
+      document.getElementById('moep-title').innerText = isMy ? "MOEP အိမ်သုံး လျှပ်စစ်မီတာ ၄ ဆင့် နှုန်းထားများ" : "Myanmar MOEP / MESC 4-Tier Tariff";
+      document.getElementById('genset-title').innerText = isMy ? "မီးပျက်ချိန် မီးစက်ဒီဇယ်ဆီ သက်သာမှု" : "Avoided Generator Fuel (Load Shedding)";
+      document.getElementById('sld-title').innerText = isMy ? "စနစ်ပုံကြမ်းနှင့် အကာအကွယ်အစီအစဉ်" : "Single-Line Diagram Schematic";
+      document.getElementById('proj-title').innerText = isMy ? "ပရောဂျက် သိမ်းဆည်းမှုနှင့် အစီရင်ခံစာ" : "Project Proposals & Quotations";
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById('tab-' + tabId).classList.add('active');
+      const idx = ['sizing', 'protection', 'cables', 'tariff', 'sld', 'projects'].indexOf(tabId);
+      if (idx !== -1) {
+        document.querySelectorAll('.nav-item')[idx].classList.add('active');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function setLocation(idx) {
+      selectedLocationIdx = idx;
+      document.querySelectorAll('#location-chips .chip').forEach((c, i) => {
+        c.classList.toggle('active', i === idx);
+      });
+      renderAll();
+    }
+
+    function setBatteryPackAh(ah) {
+      selectedBatteryAh = ah;
+      ['100', '200', '280', '300'].forEach(val => {
+        document.getElementById(`chip-${val}ah`).classList.toggle('active', parseInt(val) === ah);
+      });
+      renderAll();
+    }
+
+    function updateQty(idx, delta) {
+      appliances[idx].qty = Math.max(0, appliances[idx].qty + delta);
+      renderAll();
+    }
+
+    function updateDayH(idx, val) {
+      appliances[idx].dayH = parseFloat(val);
+      renderAll();
+    }
+
+    function updateNightH(idx, val) {
+      appliances[idx].nightH = parseFloat(val);
+      renderAll();
+    }
+
+    function updateCableDistances() {
+      pvDistM = parseFloat(document.getElementById('slider-pv-dist').value);
+      battDistM = parseFloat(document.getElementById('slider-batt-dist').value);
+      acDistM = parseFloat(document.getElementById('slider-ac-dist').value);
+
+      document.getElementById('val-pv-dist').innerText = pvDistM + " m";
+      document.getElementById('val-batt-dist').innerText = battDistM.toFixed(1) + " m";
+      document.getElementById('val-ac-dist').innerText = acDistM + " m";
+      renderCables();
+    }
+
+    function updateBlackoutHours() {
+      blackoutHours = parseFloat(document.getElementById('slider-blackout').value);
+      document.getElementById('val-blackout').innerText = blackoutHours + " Hours / day";
+      renderTariff();
+    }
+
+    function calculate() {
+      let contWatts = 0;
+      let maxSurgeDiff = 0;
+      let dayKwh = 0;
+      let nightKwh = 0;
+
+      appliances.forEach(app => {
+        const totalW = app.watts * app.qty;
+        contWatts += totalW;
+        const surgeW = totalW * app.surge;
+        if (surgeW - totalW > maxSurgeDiff) maxSurgeDiff = surgeW - totalW;
+
+        dayKwh += (totalW * app.dayH) / 1000.0;
+        nightKwh += (totalW * app.nightH) / 1000.0;
+      });
+
+      const totalDailyKwh = dayKwh + nightKwh;
+      const contKw = contWatts / 1000.0;
+      const surgeKw = (contWatts + maxSurgeDiff) / 1000.0;
+
+      const contWithSafety = contKw * 1.25;
+      const standardInverters = [3.6, 5.0, 6.0, 8.0, 10.0, 12.0, 15.0];
+      let invKw = standardInverters.find(x => x >= contWithSafety) || 15.0;
+
+      const usableKwh = nightKwh / 0.93;
+      const grossKwh = usableKwh > 0 ? usableKwh / (0.80 * 0.95) : 0;
+      const totalAh = (grossKwh * 1000.0) / 51.2;
+      const packsCount = Math.max(1, Math.ceil(totalAh / selectedBatteryAh));
+      const installedBattKwh = (packsCount * selectedBatteryAh * 51.2) / 1000.0;
+      const maxBattDischargeA = (invKw * 1000.0) / (44.0 * 0.93);
+
+      const psh = locations[selectedLocationIdx].psh;
+      const reqPvKwp = totalDailyKwh / (psh * 0.78);
+      const panelWatts = 580.0;
+      const numPanels = Math.max(1, Math.ceil((reqPvKwp * 1000.0) / panelWatts));
+      const installedPvKwp = (numPanels * panelWatts) / 1000.0;
+
+      return {
+        contKw, surgeKw, invKw, dayKwh, nightKwh, totalDailyKwh,
+        installedBattKwh, packsCount, maxBattDischargeA,
+        psh, numPanels, installedPvKwp
+      };
+    }
+
+    function renderAll() {
+      const res = calculate();
+      const isMy = currentLang === 'MY';
+
+      document.getElementById('val-inv').innerText = res.invKw.toFixed(1) + " kW";
+      document.getElementById('sub-inv').innerText = isMy ? 
+        `ပုံမှန်: ${res.contKw.toFixed(2)} kW | မော်တာဆွဲအား: ${res.surgeKw.toFixed(1)} kW` : 
+        `Continuous: ${res.contKw.toFixed(2)} kW | Surge: ${res.surgeKw.toFixed(1)} kW`;
+
+      document.getElementById('val-batt').innerText = res.installedBattKwh.toFixed(1) + " kWh";
+      document.getElementById('sub-batt').innerText = `${res.packsCount}x ${selectedBatteryAh}Ah @ 51.2V (80% DoD)`;
+
+      document.getElementById('val-pv').innerText = res.installedPvKwp.toFixed(2) + " kWp";
+      document.getElementById('sub-pv').innerText = isMy ? 
+        `${res.numPanels}x 580W TOPCon (၁ လိုင်း)` : 
+        `${res.numPanels}x 580W TOPCon (1 String)`;
+
+      document.getElementById('val-energy').innerText = res.totalDailyKwh.toFixed(1) + " kWh";
+      document.getElementById('sub-energy').innerText = isMy ? 
+        `နေ့: ${res.dayKwh.toFixed(1)} kWh | ည: ${res.nightKwh.toFixed(1)} kWh` : 
+        `Day: ${res.dayKwh.toFixed(1)} kWh | Night: ${res.nightKwh.toFixed(1)} kWh`;
+
+      const loc = locations[selectedLocationIdx];
+      document.getElementById('val-psh').innerText = loc.psh + " PSH";
+      document.getElementById('loc-desc').innerText = isMy ? loc.descMy : loc.descEn;
+
+      renderAppliances();
+      renderSwitchgear(res);
+      renderCables();
+      renderTariff();
+      renderSavedProjects();
+    }
+
+    function renderAppliances() {
+      const container = document.getElementById('appliances-container');
+      const isMy = currentLang === 'MY';
+      container.innerHTML = appliances.map((app, i) => `
+        <div class="appliance-item">
+          <div class="app-header">
+            <div>
+              <div class="app-title">${isMy ? app.nameMy : app.nameEn}</div>
+              <div class="app-sub">${app.watts}W ${app.surge > 1 ? `• ${app.surge}x Surge` : ''}</div>
+            </div>
+            <div class="qty-controls">
+              <button class="qty-btn" onclick="updateQty(${i}, -1)">-</button>
+              <div class="qty-val">${app.qty}</div>
+              <button class="qty-btn" onclick="updateQty(${i}, 1)">+</button>
+            </div>
+          </div>
+          ${app.qty > 0 ? `
+            <div class="slider-group">
+              <div class="slider-label">
+                <span>${isMy ? 'နေ့ဘက်သုံးချိန် (ဆိုလာတိုက်ရိုက်)' : 'Daytime Hours (Direct Solar)'}</span>
+                <span>${app.dayH}h</span>
+              </div>
+              <input type="range" min="0" max="16" value="${app.dayH}" oninput="updateDayH(${i}, this.value)">
+            </div>
+            <div class="slider-group">
+              <div class="slider-label">
+                <span>${isMy ? 'ညဘက်သုံးချိန် (ဘက်ထရီအားကိုး)' : 'Nighttime Hours (Battery Bank)'}</span>
+                <span>${app.nightH}h</span>
+              </div>
+              <input type="range" min="0" max="16" value="${app.nightH}" oninput="updateNightH(${i}, this.value)">
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+
+    function renderSwitchgear(res) {
+      const list = document.getElementById('switchgear-list');
+      const isMy = currentLang === 'MY';
+
+      const items = [
+        { code: "DC-FUSE", titleEn: "DC String Fuses (gPV 1000V DC)", titleMy: "ဆိုလာပြား DC ဖျူးစ် (gPV ၁၀၀၀ ဗို့)", rating: "25A / 1000V DC (10x38mm gPV)", std: "IEC 60364-7-712.533" },
+        { code: "DC-MCB", titleEn: "PV Array DC Isolator MCB (2-Pole)", titleMy: "ဆိုလာလိုင်း DC ပင်မဘရိတ်ကာ (2P MCB)", rating: "32A 2P / 1000V DC (True Arc Chute)", std: "IEC 60364-7-712.536" },
+        { code: "DC-SPD", titleEn: "PV DC Surge Protective Device (Type 2)", titleMy: "ဆိုလာလိုင်း မိုးကြိုးနှင့် ဗို့အားမြင့်ကာကွယ်မှု", rating: "Type 2 SPD, Uc=1000V, In=20kA, Imax=40kA", std: "IEC 61643-31" },
+        { code: "BATT-MCCB", titleEn: "LiFePO4 Battery DC MCCB", titleMy: "လစ်သီယမ်ဘက်ထရီ DC MCCB ပင်မဘရိတ်ကာ", rating: `${Math.round(res.maxBattDischargeA * 1.25)}A DC MCCB (Breaking ≥ 25kA AIC)`, std: "IEC 60947-2 (DC-23B)" },
+        { code: "AC-VAPROT", titleEn: "Automatic Over/Under Voltage Protector", titleMy: "အလိုအလျောက် ဗို့အားမြင့်/နိမ့် အကာအကွယ်", rating: "63A 230V Din-Rail (260V Over / 175V Under / 30s Delay)", std: "Myanmar Grid Quality Rule" },
+        { code: "AC-SPD", titleEn: "AC Mains Surge Protector (Type 2)", titleMy: "AC မီးလိုင်း မိုးကြိုးနှင့် ဗို့အားလှိုင်းကာကွယ်မှု", rating: "Type 2 SPD, Uc=275V AC, In=20kA, Imax=40kA", std: "IEC 61643-11" },
+        { code: "AC-RCD", titleEn: "Residual Current Device (Type A 30mA)", titleMy: "လျှပ်စစ်ဓာတ်လိုက်မှု အကာအကွယ် (၃၀ မီလီအမ်ပီယာ)", rating: "63A 2P, 30mA Sensitivity Type A", std: "IEC 61008-1" }
+      ];
+
+      list.innerHTML = items.map(item => `
+        <div class="sw-item">
+          <div class="sw-header">
+            <span class="sw-badge">${item.code}</span>
+            <strong style="font-size:13px;">${isMy ? item.titleMy : item.titleEn}</strong>
+          </div>
+          <div class="sw-rating">🛡️ ${item.rating}</div>
+          <div style="font-size:10.5px; color:var(--text-muted);">Standard: ${item.std}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderCables() {
+      const res = calculate();
+      const isMy = currentLang === 'MY';
+      const container = document.getElementById('cables-container');
+
+      const pvI = 13.55;
+      const pvDv = (2 * pvDistM * pvI * 0.0175) / 4.0;
+      const pvDvPct = (pvDv / 428.0) * 100.0;
+
+      const battI = res.maxBattDischargeA;
+      const battS = battI > 180 ? 70.0 : (battI > 120 ? 50.0 : 35.0);
+      const battDv = (2 * battDistM * battI * 0.0175) / battS;
+      const battDvPct = (battDv / 51.2) * 100.0;
+
+      const acI = (res.invKw * 1000.0) / 230.0;
+      const acS = acI > 32 ? 10.0 : 6.0;
+      const acDv = (2 * acDistM * acI * 0.0175) / acS;
+      const acDvPct = (acDv / 230.0) * 100.0;
+
+      const cables = [
+        {
+          name: isMy ? "ဆိုလာပြားမှ အင်ဗာတာသို့ DC လိုင်းကြိုး" : "PV Array String DC Cable",
+          size: "4.0 mm² Solar XLPO",
+          len: pvDistM + "m",
+          drop: `${pvDv.toFixed(2)}V (${pvDvPct.toFixed(2)}%)`,
+          ok: pvDvPct <= 2.0
+        },
+        {
+          name: isMy ? "လစ်သီယမ်ဘက်ထရီ ချိတ်ဆက် အထူးကေဘယ်ကြီး" : "LiFePO4 Battery DC Superflex Cable",
+          size: `${battS} mm² Superflex Tinned Copper`,
+          len: battDistM.toFixed(1) + "m",
+          drop: `${battDv.toFixed(2)}V (${battDvPct.toFixed(2)}%)`,
+          ok: battDvPct <= 1.0
+        },
+        {
+          name: isMy ? "အစိုးရမီတာမှ အင်ဗာတာသို့ AC လိုင်းကြိုး" : "AC Grid Input Line",
+          size: `${acS} mm² Annealed Copper`,
+          len: acDistM + "m",
+          drop: `${acDv.toFixed(2)}V (${acDvPct.toFixed(2)}%)`,
+          ok: acDvPct <= 2.5
+        }
+      ];
+
+      container.innerHTML = cables.map(c => `
+        <div class="sw-item">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong style="font-size:13px;">${c.name}</strong>
+            <span style="background:var(--primary-light); color:var(--primary-dark); font-weight:800; padding:4px 8px; border-radius:6px; font-size:12px;">${c.size}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-top:4px;">
+            <span>Run: ${c.len}</span>
+            <span style="color:${c.ok ? 'var(--green)' : 'var(--red)'}; font-weight:700;">Drop: ${c.drop} ${c.ok ? '✓' : '⚠️'}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderTariff() {
+      const res = calculate();
+      const monthlyKwh = res.totalDailyKwh * 30.0;
+      const monthlyGenKwh = res.installedPvKwp * res.psh * 0.78 * 30.0;
+      const netGridKwh = Math.max(0, monthlyKwh - monthlyGenKwh);
+
+      function calcMoep(units) {
+        let rem = units;
+        let t1 = Math.min(50, Math.max(0, rem)); rem -= t1;
+        let t2 = Math.min(50, Math.max(0, rem)); rem -= t2;
+        let t3 = Math.min(100, Math.max(0, rem)); rem -= t3;
+        let t4 = Math.max(0, rem);
+        let bill = (t1 * 50) + (t2 * 100) + (t3 * 150) + (t4 * 300);
+        return { bill, t1, t2, t3, t4 };
+      }
+
+      const noSolar = calcMoep(monthlyKwh);
+      const withSolar = calcMoep(netGridKwh);
+      const gridSavings = Math.max(0, noSolar.bill - withSolar.bill);
+
+      const avoidedBlackoutDailyKwh = (res.totalDailyKwh / 24.0) * blackoutHours;
+      const genFuelSavings = avoidedBlackoutDailyKwh * 30.0 * 2200.0;
+
+      const totalMonthlySavings = gridSavings + genFuelSavings;
+      const annualSavings = totalMonthlySavings * 12.0;
+      const turnkeyCost = (res.installedPvKwp * 1000 * 680) + (res.invKw * 700000) + (res.installedBattKwh * 850000) + 2500000;
+      const paybackYrs = annualSavings > 0 ? (turnkeyCost / annualSavings) : 99;
+
+      document.getElementById('val-sav').innerText = Math.round(totalMonthlySavings).toLocaleString() + " MMK";
+      document.getElementById('sub-sav').innerText = `Grid: ${Math.round(gridSavings).toLocaleString()} | Gen: ${Math.round(genFuelSavings).toLocaleString()}`;
+      document.getElementById('val-payback').innerText = paybackYrs.toFixed(1) + " Years";
+      document.getElementById('sub-payback').innerText = `Estimated Cost: ~${(turnkeyCost / 100000).toFixed(1)} Lakhs MMK`;
+
+      document.getElementById('val-bill-no-solar').innerText = Math.round(noSolar.bill).toLocaleString() + " MMK";
+      document.getElementById('val-bill-solar').innerText = Math.round(withSolar.bill).toLocaleString() + " MMK";
+      document.getElementById('val-fuel-sav').innerText = "+" + Math.round(genFuelSavings).toLocaleString() + " MMK";
+
+      document.getElementById('tier-rows').innerHTML = `
+        <tr><td>Tier 1 (1–50)</td><td>50 MMK</td><td>${noSolar.t1.toFixed(1)}</td><td>${(noSolar.t1 * 50).toLocaleString()}</td></tr>
+        <tr><td>Tier 2 (51–100)</td><td>100 MMK</td><td>${noSolar.t2.toFixed(1)}</td><td>${(noSolar.t2 * 100).toLocaleString()}</td></tr>
+        <tr><td>Tier 3 (101–200)</td><td>150 MMK</td><td>${noSolar.t3.toFixed(1)}</td><td>${(noSolar.t3 * 150).toLocaleString()}</td></tr>
+        <tr><td>Tier 4 (201+)</td><td>300 MMK</td><td>${noSolar.t4.toFixed(1)}</td><td>${(noSolar.t4 * 300).toLocaleString()}</td></tr>
+      `;
+    }
+
+    function selectSldNode(nodeId) {
+      document.querySelectorAll('.sld-node').forEach(n => n.classList.remove('active'));
+      document.getElementById('node-' + nodeId).classList.add('active');
+
+      const titleEl = document.getElementById('sld-detail-title');
+      const textEl = document.getElementById('sld-detail-text');
+      const isMy = currentLang === 'MY';
+
+      switch(nodeId) {
+        case 'pv':
+          titleEl.innerText = isMy ? "ဆိုလာပြား တပ်ဆင်မှု အချက်အလက် (PV Array)" : "PV Array Electrical Parameters";
+          textEl.innerText = isMy ? "အအေးဆုံး မနက်ခင်း အဖွင့်ဗို့ (Cold Voc) သည် Inverter အမြင့်ဆုံးဗို့ 500V အောက် လုံခြုံစွာ ရှိပါသည်။ Vmp သည် MPPT 150V-450V အတွင်း စံပြဖြစ်ပါသည်။" : "Cold morning Voc remains safely below 500V DC upper limit. Operating Vmp is centered in optimal MPPT window.";
+          break;
+        case 'dcbox':
+          titleEl.innerText = isMy ? "DC အကာအကွယ် ဘောက်စ် (IEC 60364-7-712)" : "DC Protection Combiner Box";
+          textEl.innerText = isMy ? "gPV 1000V DC Fuses + 32A 1000V DC MCB (DC Arc Chute ပါဝင်) + Type 2 DC SPD (In 20kA / Imax 40kA)။ AC ဘရိတ်ကာ လုံးဝမသုံးရပါ။" : "gPV 1000V fuses, true DC MCB with magnetic arc suppression, and Type 2 lightning surge arrester. Standard AC breakers are strictly prohibited.";
+          break;
+        case 'inv':
+          titleEl.innerText = isMy ? "အင်ဗာတာ ဗဟိုထိန်းချုပ်မှု (Hybrid Inverter)" : "Hybrid Inverter Central Hub";
+          textEl.innerText = isMy ? "ပုံမှန်ဝန်အားအတွက် 1.25 ဆ Safety Factor နှင့် မော်တာဆွဲအား (Surge) ကို ခံနိုင်ရည်ရှိအောင် တွက်ချက်ထားပါသည်။" : "Engineered with 1.25x continuous safety headroom and transient motor surge absorption.";
+          break;
+        case 'batt':
+          titleEl.innerText = isMy ? "လစ်သီယမ်ဘက်ထရီ DC MCCB (Breaking ≥ 25kA AIC)" : "LiFePO4 DC MCCB Protection";
+          textEl.innerText = isMy ? "လစ်သီယမ်ဘက်ထရီ Short-Circuit ဖြစ်ပါက လျှပ်စီးအလွန်မြင့်သဖြင့် Breaking Capacity အနည်းဆုံး 20-25kA ရှိသော DC MCCB နှင့် Class T ဖျူးစ် သုံးရမည်။" : "LiFePO4 delivers massive short-circuit currents. Breaking capacity must be >= 25kA AIC to extinguish DC arc safely.";
+          break;
+        case 'ac':
+          titleEl.innerText = isMy ? "AC မီးလိုင်း အကာအကွယ် (TOMZN V/A Protector)" : "AC Grid Power Quality & Shock Safety";
+          textEl.innerText = isMy ? "TOMZN 63A Protector (260V Over / 175V Under / 30s Delay) ဖြင့် မီးအားအတက်အကျဒဏ်မှ ကာကွယ်ပြီး 30mA Type A RCD ဖြင့် ဓာတ်လိုက်မှုမှ ကာကွယ်ပါသည်။" : "TOMZN 63A digital relay protects against erratic Myanmar voltage surges/brownouts, while 30mA Type A RCD guards against electric shock.";
+          break;
+        case 'earth':
+          titleEl.innerText = isMy ? "မြေစိုက်စနစ် (Earthing < 5.0 Ohms)" : "Equipotential Grounding System";
+          textEl.innerText = isMy ? "၅/၈ လက်မ x ၁၀ ပေ ကြေးနီကပ် သံတိုင်ဖြင့် မြေစိုက်ခုခံမှု ၅ အုမ်းအောက် ရရှိအောင် ပြုလုပ်ပြီး 16 mm² ကြေးနီကြိုးဖြင့် SPD နှင့် ကိုယ်ထည်များကို ချိတ်ဆက်ပါ။" : "5/8\" x 10ft copper-bonded ground rod tested strictly < 5.0 Ohms, bonded with 16 mm² copper conductor.";
+          break;
+      }
+    }
+
+    function saveCurrentProject() {
+      const res = calculate();
+      const projName = prompt("Enter Client / Project Name:", "Mandalay Home System");
+      if (!projName) return;
+
+      const saved = JSON.parse(localStorage.getItem('solar_pro_projects') || '[]');
+      saved.unshift({
+        id: Date.now(),
+        name: projName,
+        date: new Date().toLocaleDateString(),
+        inv: res.invKw + " kW",
+        pv: res.installedPvKwp.toFixed(1) + " kWp",
+        batt: res.installedBattKwh.toFixed(1) + " kWh"
+      });
+      localStorage.setItem('solar_pro_projects', JSON.stringify(saved));
+      showToast("Project quotation saved!");
+      renderSavedProjects();
+    }
+
+    function renderSavedProjects() {
+      const list = document.getElementById('saved-projects-list');
+      const saved = JSON.parse(localStorage.getItem('solar_pro_projects') || '[]');
+      if (saved.length === 0) {
+        list.innerHTML = `<div style="font-size:11px; color:var(--text-muted); text-align:center; padding:12px;">No saved proposals yet. Tap 'Save Project' above.</div>`;
+        return;
+      }
+      list.innerHTML = saved.map((p, i) => `
+        <div class="sw-item" style="flex-direction:row; justify-content:space-between; align-items:center;">
+          <div>
+            <strong style="font-size:13px;">${p.name}</strong>
+            <div style="font-size:10.5px; color:var(--text-muted);">${p.date} • ${p.inv} Inverter • ${p.pv} PV • ${p.batt} Battery</div>
+          </div>
+          <button style="background:none; border:none; color:var(--red); font-size:16px; cursor:pointer;" onclick="deleteProject(${i})">🗑️</button>
+        </div>
+      `).join('');
+    }
+
+    function deleteProject(idx) {
+      const saved = JSON.parse(localStorage.getItem('solar_pro_projects') || '[]');
+      saved.splice(idx, 1);
+      localStorage.setItem('solar_pro_projects', JSON.stringify(saved));
+      renderSavedProjects();
+    }
+
+    function copyScheduleToClipboard() {
+      const res = calculate();
+      const loc = locations[selectedLocationIdx];
+      const text = `==================================================
+SOLAR PV ELECTRICAL DESIGN & PROTECTION SCHEDULE
+IEC 60364-7-712 COMPLIANT (MYANMAR FRAMEWORK)
+==================================================
+Location: ${loc.nameEn} | PSH: ${res.psh} hrs/day
+Daily Demand: ${res.totalDailyKwh.toFixed(1)} kWh/day (Day: ${res.dayKwh.toFixed(1)} kWh, Night: ${res.nightKwh.toFixed(1)} kWh)
+Continuous Load: ${res.contKw.toFixed(2)} kW | Surge Load: ${res.surgeKw.toFixed(1)} kW
+
+1. INVERTER & BATTERY SIZING:
+   - Inverter: ${res.invKw} kW Hybrid (230V / 51.2V DC)
+   - LiFePO4 Battery Bank: ${res.installedBattKwh.toFixed(1)} kWh @ 51.2V DC (${res.packsCount}x ${selectedBatteryAh}Ah Packs)
+   - Max Discharge Current @ 44V: ${res.maxBattDischargeA.toFixed(1)} A
+
+2. PV ARRAY CONFIGURATION:
+   - Array Size: ${res.installedPvKwp.toFixed(2)} kWp (${res.numPanels}x 580W TOPCon Modules)
+
+3. SWITCHGEAR PROTECTION (IEC 60364-7-712):
+   - DC Fuses: gPV 1000V DC 25A
+   - DC Isolator MCB: 32A 2P 1000V DC (Arc Chute)
+   - DC SPD: Type 2, Uc=1000V, In=20kA, Imax=40kA
+   - Battery DC MCCB: ${Math.round(res.maxBattDischargeA * 1.25)}A DC (Breaking >= 25kA AIC)
+   - AC Grid Protection: TOMZN 63A V/A Protector (260V/175V/30s) + AC SPD Type 2 + 30mA RCD
+   - Earth Grounding: 5/8" x 10ft Copper-bonded rod (< 5.0 Ohms)
+
+4. CABLES:
+   - PV Cable: 4.0 mm² Solar XLPO 1500V DC
+   - Battery Cable: ${res.maxBattDischargeA > 180 ? '70' : '50'} mm² Superflex Tinned Copper
+   - AC Lines: 6.0 - 10.0 mm² Copper
+==================================================`;
+
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => showToast("Engineering Schedule copied to clipboard!"));
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        showToast("Engineering Schedule copied to clipboard!");
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderAll();
+    });
+  </script>
+</body>
+</html>
